@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_id     Int      @id @default(autoincrement())
+  full_name   String?   
+  username    String   @unique @db.VarChar(255) 
+  password    String   @db.VarChar(255)
+  email       String   @db.VarChar(255) @unique
+  foto        String?  @db.VarChar(255)
+  bio         String?  @db.VarChar(100)
+  
+  //relation
+  posts     Post[]
+  likes     Like[]
+  comments  Comment[]
+}
+
+model Post {
+  post_id       Int         @id @default(autoincrement())
+  description   String?     @db.Text
+  image         String      @db.VarChar(255)
+  createdAt     DateTime    @default(now()) @db.Date
+  updatedAt     DateTime?   @updatedAt  
+
+  user   User           @relation(fields: [user_id], references: [user_id])
+  user_id       Int 
+
+  // relation
+  likes     Like[]
+  comments  Comment[]
+}
+
+model Like {
+  like_id     Int       @id @default(autoincrement())
+
+  user   User           @relation(fields: [user_id], references: [user_id])
+  user_id     Int
+
+  posts  Post           @relation(fields: [post_id], references: [post_id])     
+  post_id     Int
+}
+
+model Comment {
+  comment_id     Int       @id @default(autoincrement())
+  comment        String      @db.Text
+  createdAt     DateTime    @default(now()) @db.Date
+  updatedAt     DateTime?   @updatedAt  
+
+  user   User           @relation(fields: [user_id], references: [user_id])
+  user_id     Int
+
+  posts  Post           @relation(fields: [post_id], references: [post_id])     
+  post_id     Int
+}
